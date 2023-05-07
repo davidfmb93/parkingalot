@@ -1,5 +1,5 @@
-using System.ComponentModel.DataAnnotations;
 using app.Context;
+using System.ComponentModel.DataAnnotations;
 
 namespace app.Models
 {
@@ -7,13 +7,12 @@ namespace app.Models
     {
         [Key]
         public int Id { get; set; }
-        public DateTime StartTime { get; set; }  = DateTime.Now;
+        public DateTime StartTime { get; set; } = DateTime.Now;
         public DateTime? EndTime { get; set; }
 
-        // One-to-many relation with author
+        // One-to-many relation with Vehicle
         public int VehicleId { get; set; }
 
         public Vehicle? Vehicle { get; set; }
-
     }
 }

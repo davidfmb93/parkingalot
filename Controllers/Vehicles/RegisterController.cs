@@ -1,7 +1,8 @@
-using Microsoft.AspNetCore.Mvc;
-using app.Repositories;
 using app.Models;
-using static System.Reflection.Metadata.BlobBuilder;
+using app.Repositories;
+using app.Responses;
+using Microsoft.AspNetCore.Mvc;
+using System.Text.RegularExpressions;
 
 namespace app.Controllers.Vehicles;
 
@@ -9,10 +10,7 @@ namespace app.Controllers.Vehicles;
 [Route("parking/[controller]")]
 public class RegisterController : ControllerBase
 {
-    private Double PRICE = 0.05;
-        
     private readonly ILogger<RegisterController> _logger;
-
     private readonly IParkingRepository _parkingRepository;
 
     public RegisterController(ILogger<RegisterController> logger, IParkingRepository parkingRepository)
@@ -24,6 +22,14 @@ public class RegisterController : ControllerBase
     [HttpPost("/check-in")]
     public async Task<ActionResult<Vehicle>> CheckIn(Vehicle vehicle)
     {
+        var regex = @"^(?!.*(ñ))[ABCDFGHJKLMNPRSTVWXYZ]{3}-[0-9]{5}";
+
+        var match = new Regex(regex);
+
+        if (!match.IsMatch(vehicle.NumberPlate))
+        {
+            return StatusCode(StatusCodes.Status500InternalServerError, $"{vehicle.NumberPlate} isn't right Format ABC-12345.");
+        }
         var record = await _parkingRepository.AddVehicleAsync(vehicle);
 
         if (record == null)
@@ -35,22 +41,27 @@ public class RegisterController : ControllerBase
     }
 
     [HttpPost("/check-out/{NumberPlate}")]
-    public async Task<ActionResult<Vehicle>> CheckOut(String NumberPlate)
+    public async Task<ActionResult<Checkout>> CheckOut(String NumberPlate)
     {
-             Vehicle vehicle = await _parkingRepository.GetVehicleAsync(NumberPlate);
+        Vehicle vehicle = await _parkingRepository.GetVehicleAsync(NumberPlate);
 
-            if (vehicle == null)
-            {
-                return StatusCode(StatusCodes.Status500InternalServerError, $"{NumberPlate} could not be updated.");
-            }
+        if (vehicle == null)
+        {
+            return StatusCode(StatusCodes.Status500InternalServerError, $"{NumberPlate} could not be updated.");
+        }
 
-            Vehicle checkoutVehicle = await _parkingRepository.CheckoutVehicleAsync(vehicle);
+        if (vehicle.Times.Count == 0 || (vehicle.Times.Last().EndTime != null & vehicle.MemberShip != MemberShip.Resident))
+        {
+            return StatusCode(StatusCodes.Status204NoContent, $"{NumberPlate} please do check-in.");
+        }
 
-            if (checkoutVehicle == null)
-            {
-                return StatusCode(StatusCodes.Status500InternalServerError, $"{NumberPlate} could not be updated");
-            }
+        Checkout checkoutVehicle = await _parkingRepository.CheckoutVehicleAsync(vehicle);
 
-            return StatusCode(StatusCodes.Status200OK, checkoutVehicle);
+        if (checkoutVehicle == null)
+        {
+            return StatusCode(StatusCodes.Status500InternalServerError, $"{NumberPlate} could not be updated");
+        }
+
+        return StatusCode(StatusCodes.Status200OK, checkoutVehicle);
     }
 }

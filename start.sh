@@ -1,0 +1,1 @@
+docker-compose up -d && echo "Go to: http://localhost:7201/swagger"

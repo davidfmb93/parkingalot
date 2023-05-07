@@ -1,23 +1,31 @@
+using app.Repositories;
 using Microsoft.AspNetCore.Mvc;
-using System.ComponentModel;
 
 namespace app.Controllers.Vehicles;
 
 [ApiController]
 [Route("/api/vehicle/[controller]")]
-[DisplayName("Your New Tag")]
-public class RestartController  : ControllerBase
+public class RestartController : ControllerBase
 {
-    private readonly ILogger<RestartController > _logger;
+    private readonly ILogger<RestartController> _logger;
+    private readonly IParkingRepository _parkingRepository;
 
-    public RestartController (ILogger<RestartController > logger)
+    public RestartController(ILogger<RestartController> logger, IParkingRepository parkingRepository)
     {
         _logger = logger;
+        _parkingRepository = parkingRepository;
     }
 
     [HttpGet]
-    public String Restart()
+    public async Task<IActionResult> Restart()
     {
-        return " Restarting... ";
+        (bool status, string message) = await _parkingRepository.DeleteTimesAsync();
+
+        if (status == false)
+        {
+            return StatusCode(StatusCodes.Status500InternalServerError, message);
+        }
+
+        return StatusCode(StatusCodes.Status200OK, message);
     }
 }

@@ -1,9 +1,6 @@
-using System.ComponentModel.DataAnnotations;
-using System.Text.Json.Serialization;
 using app.Context;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore.Storage.ValueConversion.Internal;
 using Swashbuckle.AspNetCore.Annotations;
+using System.ComponentModel.DataAnnotations;
 
 namespace app.Models
 {
@@ -14,12 +11,12 @@ namespace app.Models
         public int Id { get; set; }
         public string? NumberPlate { get; set; }
 
-        // One-to-many relation with author
-        public MemberShip? MemberShip { get; set; }
+        // One-to-many relation with Member
+        [SwaggerSchema(ReadOnly = true)]
+        public MemberShip MemberShip { get; set; } = MemberShip.NoResident;
 
-        // One-to-many relationship with times
+        // One-to-many relationship with Times
         [SwaggerSchema(ReadOnly = true)]
         public List<Time>? Times { get; set; }
-
     }
 }

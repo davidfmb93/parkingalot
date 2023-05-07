@@ -1,5 +1,5 @@
-using Microsoft.EntityFrameworkCore;
 using app.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace app.Context
 {

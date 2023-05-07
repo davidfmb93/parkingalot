@@ -1,23 +1,31 @@
+using app.Repositories;
 using Microsoft.AspNetCore.Mvc;
-using System.ComponentModel;
 
 namespace app.Controllers.Vehicles;
 
 [ApiController]
 [Route("/api/vehicle/[controller]")]
-[DisplayName("Your New Tag")]
-public class ReportController  : ControllerBase
+public class ReportController : ControllerBase
 {
-    private readonly ILogger<ReportController > _logger;
+    private readonly ILogger<ReportController> _logger;
+    private readonly IParkingRepository _parkingRepository;
 
-    public ReportController (ILogger<ReportController > logger)
+    public ReportController(ILogger<ReportController> logger, IParkingRepository parkingRepository)
     {
         _logger = logger;
+        _parkingRepository = parkingRepository;
     }
 
     [HttpGet]
-    public String Report()
+    public async Task<IActionResult> GetReport()
     {
-        return " Report... ";
+        var report = await _parkingRepository.GetPaymentResidentsAsync();
+
+        if (report == null)
+        {
+            return StatusCode(StatusCodes.Status204NoContent, "No report in database");
+        }
+
+        return StatusCode(StatusCodes.Status200OK, report);
     }
 }
