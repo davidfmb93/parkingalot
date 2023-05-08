@@ -44,11 +44,12 @@ When you run the previous commands you can go to the following link http://local
 
 ## Connection DB
 
+```
 Server: localhost, 1433
 Authentication type: SQL Login
 user name: sa
 Password: S3cur3P@ssW0rd!
-
+```
 
 ### Diagram DB
 
